@@ -4,7 +4,12 @@ import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [mdx(), tailwind()],
+  integrations: [
+    mdx(),
+    tailwind({
+      applyBaseStyles: true,
+    }),
+  ],
   output: 'static',
   site: 'https://hannesmerkell.com',
 });
