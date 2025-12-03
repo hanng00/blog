@@ -1,0 +1,64 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => {
+    return import.meta.env.PROD ? !data.draft : true;
+  });
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { title, description, pubDate, updatedDate, tags } = post.data;
+
+const formattedDate = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+}).format(pubDate);
+
+const formattedUpdatedDate = updatedDate
+  ? new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(updatedDate)
+  : null;
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main class="max-w-content mx-auto py-16">
+    <article>
+      <header class="mb-12 border-b border-gray-200 pb-12">
+        <h1
+          class="font-sans text-[42px] font-semibold mb-6 leading-[1.2] tracking-[-0.02em] text-[#1a1a1a]"
+        >
+          {title}
+        </h1>
+        {
+          description && (
+            <p class="font-serif text-xl text-[#666] mb-8 leading-relaxed font-normal">
+              {description}
+            </p>
+          )
+        }
+        <div class="font-sans text-sm text-[#999] font-normal">
+          <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+        </div>
+      </header>
+      <div class="prose prose-lg max-w-none font-serif">
+        <Content />
+      </div>
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>
